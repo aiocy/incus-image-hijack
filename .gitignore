@@ -1,0 +1,8 @@
+# Generated certs/keys (never commit)
+*.key
+*.csr
+*.srl
+ca.pem
+
+# Image files (large, hosted as release assets)
+/images/

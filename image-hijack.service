@@ -1,0 +1,23 @@
+[Unit]
+Description=Incus Image Hijack Server
+Documentation=https://github.com/aiocy/incus-image-hijack
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env python3 /opt/image-hijack/server.py
+Restart=always
+RestartSec=3
+User=root
+Environment=HIJACK_PORT=443
+Environment=HIJACK_ROOT=/opt/image-hijack
+Environment=HIJACK_CERT=/opt/image-hijack/server.pem
+Environment=HIJACK_KEY=/opt/image-hijack/server.key
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
+ProtectHome=yes
+ProtectSystem=full
+ReadWritePaths=/opt/image-hijack
+
+[Install]
+WantedBy=multi-user.target
