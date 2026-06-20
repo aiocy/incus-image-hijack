@@ -107,3 +107,38 @@ rm /usr/local/share/ca-certificates/hijack-ca.crt
 update-ca-certificates --fresh
 nft list ruleset > /etc/nftables.conf
 ```
+
+## Auto-Update (v2.0)
+
+When Incus requests a new Alpine image version that isn't cached yet, the
+hijack **automatically downloads, SSH-patches, and caches it** — no manual
+intervention needed.
+
+### How it works
+
+1. **`server.py`** — enhanced HTTPS server that on cache miss triggers
+   `auto_update.py` to fetch the new image from the upstream mirror.
+2. **`auto_update.py`** — standalone script that:
+   - Temporarily disables the nftables DNAT to reach the real upstream
+   - Downloads `incus.tar.xz`, `rootfs.squashfs`, `meta.tar.xz`
+   - Unpacks rootfs, installs `openssh-server`, configures SSH, repacks
+   - Caches the patched files
+   - Restores DNAT and restarts the hijack
+
+### Cron (recommended)
+
+A daily cron job ensures new images are downloaded proactively:
+
+```bash
+0 6 * * * /usr/bin/python3 /opt/image-hijack/auto_update.py >> /var/log/image-hijack-auto-update.log 2>&1
+```
+
+### Manual run
+
+```bash
+# Check for and download latest Alpine
+/opt/image-hijack/auto_update.py
+
+# Or specify a specific serial
+/opt/image-hijack/auto_update.py 20260620_13:00
+```
